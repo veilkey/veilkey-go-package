@@ -16,3 +16,9 @@ const (
 	// DefaultPort is the default TCP port for localvault agent HTTP listeners.
 	DefaultPort = 10180
 )
+
+// vaultcenter API path constants.
+// Used by both vaultcenter (route registration) and localvault (client calls).
+const (
+	PathRegistrationTokenValidate = "/api/registration-tokens/"
+)
