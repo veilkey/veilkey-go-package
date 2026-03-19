@@ -47,6 +47,31 @@ func ParseRef(raw string) (family string, scope RefScope, id string, err error) 
 	return parts[0], RefScope(parts[1]), parts[2], nil
 }
 
+// NormalizeScopeStatus normalizes scope and status for a given ref family.
+// If scope is empty, fallbackScope is used; if still empty, RefScopeTemp.
+// LOCAL/EXTERNAL scopes default to active status; TEMP defaults to temp status.
+func NormalizeScopeStatus(family string, scope RefScope, status RefStatus, fallbackScope RefScope) (RefScope, RefStatus, error) {
+	if scope == "" {
+		scope = fallbackScope
+	}
+	if scope == "" {
+		scope = RefScopeTemp
+	}
+	switch scope {
+	case RefScopeLocal, RefScopeExternal:
+		if status == "" {
+			status = RefStatusActive
+		}
+	case RefScopeTemp:
+		if status == "" {
+			status = RefStatusTemp
+		}
+	default:
+		return "", "", fmt.Errorf("unsupported %s scope: %s", family, scope)
+	}
+	return scope, status, nil
+}
+
 func splitRef(s string) []string {
 	var parts []string
 	start := 0
