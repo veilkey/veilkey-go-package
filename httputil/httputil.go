@@ -9,8 +9,18 @@ import (
 	"strings"
 )
 
-// MaxBulkItems is the maximum number of items allowed in a bulk operation.
-const MaxBulkItems = 200
+// Common HTTP constants.
+const (
+	ContentTypeJSON = "application/json"
+	MaxBulkItems    = 200
+)
+
+// Standard proxy/CDN header names for client IP extraction.
+const (
+	HeaderCFConnectingIP = "CF-Connecting-IP"
+	HeaderXRealIP        = "X-Real-IP"
+	HeaderXForwardedFor  = "X-Forwarded-For"
+)
 
 // JoinPath joins a base URL with path elements.
 // Panics if base is not a valid URL (always a programming error with hardcoded bases).
