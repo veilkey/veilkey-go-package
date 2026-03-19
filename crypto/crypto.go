@@ -5,8 +5,10 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"strings"
 )
 
 // GenerateKey generates a random 32-byte AES-256 key.
@@ -70,6 +72,28 @@ func EncryptDEK(kek, dek []byte) (ciphertext, nonce []byte, err error) {
 // DecryptDEK decrypts a DEK that was encrypted with a KEK.
 func DecryptDEK(kek, encryptedDEK, nonce []byte) ([]byte, error) {
 	return Decrypt(kek, encryptedDEK, nonce)
+}
+
+// EncodeCiphertext encodes ciphertext and nonce as "base64(cipher):base64(nonce)".
+func EncodeCiphertext(ciphertext, nonce []byte) string {
+	return base64.StdEncoding.EncodeToString(ciphertext) + ":" + base64.StdEncoding.EncodeToString(nonce)
+}
+
+// DecodeCiphertext decodes a "base64(cipher):base64(nonce)" string.
+func DecodeCiphertext(encoded string) (ciphertext, nonce []byte, err error) {
+	parts := strings.SplitN(encoded, ":", 2)
+	if len(parts) != 2 {
+		return nil, nil, fmt.Errorf("invalid ciphertext format: expected cipher:nonce")
+	}
+	ciphertext, err = base64.StdEncoding.DecodeString(parts[0])
+	if err != nil {
+		return nil, nil, fmt.Errorf("decode ciphertext: %w", err)
+	}
+	nonce, err = base64.StdEncoding.DecodeString(parts[1])
+	if err != nil {
+		return nil, nil, fmt.Errorf("decode nonce: %w", err)
+	}
+	return ciphertext, nonce, nil
 }
 
 // GenerateUUID generates a random UUID v4.
