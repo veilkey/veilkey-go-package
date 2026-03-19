@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -64,6 +65,17 @@ func ParseDurationEnv(key string, defaultVal time.Duration) time.Duration {
 		log.Printf("warning: invalid duration %s=%q, using default %s", key, v, defaultVal)
 	}
 	return defaultVal
+}
+
+// ReadPasswordFromDataDir reads a password from dataDir/password file.
+// Returns empty string if the file does not exist or cannot be read.
+func ReadPasswordFromDataDir(dataDir string) string {
+	path := filepath.Join(dataDir, "password")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(string(data))
 }
 
 // GenerateHexRef generates a random hex string of the given character length.
