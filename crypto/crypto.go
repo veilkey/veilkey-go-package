@@ -117,6 +117,13 @@ func GenerateHexRef(length int) (string, error) {
 	return hex.EncodeToString(b)[:length], nil
 }
 
+// DeriveDBKey derives a SQLCipher encryption key from the salt file.
+// Returns a 64-char hex string suitable for VEILKEY_DB_KEY.
+func DeriveDBKey(salt []byte) string {
+	h := sha256.Sum256(salt)
+	return hex.EncodeToString(h[:])
+}
+
 // GenerateShortHash generates a short CK:xxxxxxxx hash from an encrypted value.
 func GenerateShortHash(encryptedValue []byte) string {
 	hash := sha256.Sum256(encryptedValue)
