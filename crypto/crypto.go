@@ -129,3 +129,10 @@ func GenerateShortHash(encryptedValue []byte) string {
 	hash := sha256.Sum256(encryptedValue)
 	return fmt.Sprintf("CK:%s", hex.EncodeToString(hash[:])[:8])
 }
+
+// DeriveDBKeyFromKEK derives a SQLCipher encryption key from the KEK.
+// DB can only be opened when KEK is in memory (after unlock).
+func DeriveDBKeyFromKEK(kek []byte) string {
+	h := sha256.Sum256(kek)
+	return hex.EncodeToString(h[:])
+}
