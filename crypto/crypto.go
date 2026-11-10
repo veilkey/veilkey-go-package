@@ -29,7 +29,8 @@ func GenerateNonce() ([]byte, error) {
 	return nonce, nil
 }
 
-// Encrypt encrypts plaintext using AES-256-GCM. Returns ciphertext and nonce.
+// Encrypt encrypts plaintext using AES-GCM with a 16-, 24-, or 32-byte key.
+// Returns ciphertext and a fresh nonce, or an error for invalid input.
 func Encrypt(key, plaintext []byte) (ciphertext, nonce []byte, err error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
@@ -39,15 +40,19 @@ func Encrypt(key, plaintext []byte) (ciphertext, nonce []byte, err error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	nonce, err = GenerateNonce()
-	if err != nil {
+	if uint64(len(plaintext)) > ((1<<32)-2)*aes.BlockSize {
+		return nil, nil, fmt.Errorf("plaintext exceeds AES-GCM size limit")
+	}
+	nonce = make([]byte, gcm.NonceSize())
+	if _, err = rand.Read(nonce); err != nil {
 		return nil, nil, err
 	}
 	ciphertext = gcm.Seal(nil, nonce, plaintext, nil)
 	return ciphertext, nonce, nil
 }
 
-// Decrypt decrypts ciphertext using AES-256-GCM.
+// Decrypt decrypts AES-GCM ciphertext with a 16-, 24-, or 32-byte key.
+// Invalid key, nonce, or ciphertext lengths return an error.
 func Decrypt(key, ciphertext, nonce []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
@@ -56,6 +61,12 @@ func Decrypt(key, ciphertext, nonce []byte) ([]byte, error) {
 	gcm, err := cipher.NewGCM(block)
 	if err != nil {
 		return nil, err
+	}
+	if len(nonce) != gcm.NonceSize() {
+		return nil, fmt.Errorf("invalid nonce length: got %d, want %d", len(nonce), gcm.NonceSize())
+	}
+	if len(ciphertext) < gcm.Overhead() {
+		return nil, fmt.Errorf("ciphertext is shorter than the AES-GCM authentication tag")
 	}
 	plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
 	if err != nil {

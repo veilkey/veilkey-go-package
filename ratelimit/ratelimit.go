@@ -134,8 +134,8 @@ func respondRateLimited(w http.ResponseWriter, remaining time.Duration) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusTooManyRequests)
 	secs := int(remaining.Seconds()) + 1
-	fmt.Fprintf(w, `{"error":"too many failed unlock attempts, retry after %d seconds"}`, secs)
-	fmt.Fprintln(w)
+	_, _ = fmt.Fprintf(w, `{"error":"too many failed unlock attempts, retry after %d seconds"}`, secs)
+	_, _ = fmt.Fprintln(w)
 }
 
 // responseInterceptor captures the status code while passing through writes.
