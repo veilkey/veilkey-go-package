@@ -13,6 +13,7 @@ import (
 const DefaultTimeout = 30 * time.Second
 
 // NewHTTPClient creates an HTTP client configured for TLS inter-service communication.
+// Certificate verification is enabled unless insecure is explicitly true.
 func NewHTTPClient(caPath string, insecure bool) (*http.Client, error) {
 	tlsConfig := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -43,22 +44,16 @@ func NewHTTPClient(caPath string, insecure bool) (*http.Client, error) {
 }
 
 // InitHTTPClientFromEnv creates an HTTP client based on VEILKEY_TLS_CA and
-// VEILKEY_TLS_INSECURE environment variables.
+// VEILKEY_TLS_INSECURE environment variables. Only the exact value "1" disables
+// verification. Invalid CA configuration falls back to verified system roots.
 func InitHTTPClientFromEnv() *http.Client {
 	caPath := os.Getenv("VEILKEY_TLS_CA")
 	insecure := os.Getenv("VEILKEY_TLS_INSECURE") == "1"
 
-	if caPath == "" && !insecure {
-		return &http.Client{
-			Timeout: DefaultTimeout,
-		}
-	}
-
 	client, err := NewHTTPClient(caPath, insecure)
 	if err != nil {
-		return &http.Client{
-			Timeout: DefaultTimeout,
-		}
+		// Without a CA file, construction cannot fail. Keep verification enabled.
+		client, _ = NewHTTPClient("", false)
 	}
 	return client
 }

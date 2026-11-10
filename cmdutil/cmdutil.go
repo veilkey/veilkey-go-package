@@ -36,7 +36,7 @@ func ReadPassword(prompt string) string {
 	stat, _ := os.Stdin.Stat()
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
 		var s string
-		fmt.Fscan(os.Stdin, &s)
+		_, _ = fmt.Fscan(os.Stdin, &s)
 		return strings.TrimSpace(s)
 	}
 
@@ -44,11 +44,11 @@ func ReadPassword(prompt string) string {
 	if err != nil {
 		log.Fatalf("Failed to open TTY: %v", err)
 	}
-	defer tty.Close()
+	defer func() { _ = tty.Close() }()
 
-	fmt.Fprint(tty, prompt)
+	_, _ = fmt.Fprint(tty, prompt)
 	data, err := term.ReadPassword(int(tty.Fd()))
-	fmt.Fprintln(tty)
+	_, _ = fmt.Fprintln(tty)
 	if err != nil {
 		log.Fatalf("Failed to read password: %v", err)
 	}

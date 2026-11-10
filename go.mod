@@ -1,6 +1,6 @@
 module github.com/veilkey/veilkey-go-package
 
-go 1.25.0
+go 1.26.10
 
 require (
 	github.com/mattn/go-sqlite3 v1.14.33
@@ -14,5 +14,5 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	golang.org/x/sys v0.42.0 // indirect
-	golang.org/x/text v0.35.0 // indirect
+	golang.org/x/text v0.39.0 // indirect
 )
